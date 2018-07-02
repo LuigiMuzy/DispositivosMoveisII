@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+    <!-- <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" /> -->
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <link rel="stylesheet" type="text/css" href="css/estilo.css" />
+    <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.5.min.css" />
+
+    <title>Cadastro do Brasileirao</title>
+
+    <script type="text/javascript" charset="utf-8">
+    // onSuccess Callback
+    //   This method accepts a `Position` object, which contains
+    //   the current GPS coordinates
+    //
+    function onSuccess(position) {
+        var element = document.getElementById('aparece');
+        element.innerHTML = 'Latitude: '  + position.coords.latitude      + '<br />' +
+                            'Longitude: ' + position.coords.longitude     + '<br />' +
+                            '<hr />'      + element.innerHTML;
+    }
+
+    // onError Callback receives a PositionError object
+    //
+    function onError(error) {
+        alert('code: '    + error.code    + '\n' +
+              'message: ' + error.message + '\n');
+    }
+
+    // Options: throw an error if no update is received every 30 seconds.
+    //
+    function latitude(){
+    var watchID = navigator.geolocation.watchPosition(onSuccess, onError, { timeout: 30000 });
+  }
+
+      document.addEventListener("deviceready", onDeviceReady, false);
+
+      function onDeviceReady() {
+        var db = window.openDatabase("Database","1.0", "atividadeBD", 2000000);
+        db.transaction(populateDB, errorCB, successCB);
+        // document.getElementById('aparece').innerHTML = "Level: " + status.level + " isPlugged: " + status.isPlugged;
+        alert("Level: " + status.level + " isPlugged: " + status.isPlugged);
+
+      }
+
+      // document.addEventListener("batterystatus", onBatteryStatus, false);
+      //
+      // function onBatteryStatus(status) {
+      //
+      //   document.getElementById('aparece').innerHTML = "Level: " + status.level + " isPlugged: " + status.isPlugged;
+      // }
+
+      function populateDB(tx){
+        tx.executeSql('DROP TABLE IF EXISTS cliente');
+        tx.executeSql('CREATE TABLE cliente (id INTEGER PRIMARY KEY ASC, nome, fone)');
+        tx.executeSql('INSERT INTO cliente(id, nome, fone) VALUES(1,"Luigi", 912345678)');
+        tx.executeSql('INSERT INTO cliente(id, nome, fone) VALUES(2,"Ricardo", 912345678)');
+        tx.executeSql('INSERT INTO cliente(id, nome, fone) VALUES(3,"Black", 912345678)');
+        tx.executeSql('INSERT INTO cliente(id, nome, fone) VALUES(4,"Fracalanza M.", 912345678)');
+      }
+      function errorCB(err){
+        alert("erro: "+err.code);
+      }
+      function successCB(){
+        alert("Operação Realizada com Sucesso");
+      }
+
+      function show(){
+        var db = window.openDatabase("Database","1.0", "atividadeBD", 2000000);
+        db.transaction(queryDB, errorCB);
+      }
+      function queryDB(tx){
+        tx.executeSql('SELECT * FROM cliente', [], querySuccess, errorCB);
+      }
+      function querySuccess(tx, results){
+        var watchID = navigator.geolocation.watchPosition(onSuccess, onError, { timeout: 30000 });
+        var len = results.rows.length;
+        alert(len+" linhas encontradas");
+        for(var i=0; i<len; i++){
+          if(watchID == 1){
+            watchID = "Bloqueado devido segurança";
+          }
+          if(watchID == 2){
+            watchID = "Acesso Negado";
+          }
+          //alert("ID: "+results.rows.item(i).id+" clube: "+results.rows.item(i).clubes);
+          document.getElementById('aparece').innerHTML+="<div style='width:45%;'> \
+                    <p><strong>ID:</strong>"+results.rows.item(i).id+"\t\t<strong>Nome:</strong>"+results.rows.item(i).nome + "</p><br><p><strong>Fone:</strong>"+results.rows.item(i).fone+"\t\t<strong>Coordenadas:</strong>"+watchID+"</div> \
+        <br>"
+        }
+      }
+      function esconder(){
+          document.getElementById('aparece').innerHTML = "";
+      }
+      function adiciona(){
+        var db = window.openDatabase("Database", "1.0", "atividadeBD", 2000000);
+        db.transaction(function(transaction){
+          transaction.executeSql('INSERT INTO cliente(nome,fone) VALUES (?,?)', [$('#nome').val(), $('#fone').val()], successCB , errorCB);
+  })
+}
+
+function deleta() {
+  var db = window.openDatabase("Database", "1.0", "atividadeBD", 2000000);
+  db.transaction(function(transaction){
+    transaction.executeSql('DELETE FROM cliente WHERE id = (?)', [$('#idcliente').val()], successCB, errorCB);
+})
+}
+    </script>
+</head>
+
+<body class="container">
+  <div class="abasDet">
+
+    <ul class="nav nav-tabs tabContato" role="tablist">
+                 <li><h2>Cadastro Clientes</h2></li>
+             </ul>
+
+           <div class="tab-content">
+
+               <div style="position:relative;">
+
+                 <div class="cadastro" style="float:left;width: 45%;">
+                  <h4> Cadastrar</h4>
+                   <input id="nome" type="text" placeholder="Nome: ">
+                   <input id="fone" type="text" placeholder="Fone: ">
+                   <input type="button" value="Adicionar" onclick="adiciona()">
+                 </div>
+                 <div class="deleta" style="float:right;width: 45%;">
+                   <h4> Deletar cadastro</h4>
+                   <input id="idcliente" type="text" placeholder="Id: ">
+                   <input type="button" value="Deletar" onclick="deleta()">
+                 </div>
+
+               </div><!-- fim aba 1 -->
+                   <div style="position: relative;" id="aparece"></div>
+                   <div class="botao" style="width: 100%;display:inline-flex;">
+
+                      <input type="button" style="width: 30%;" value="Mostrar Cadastro" onclick="show()">
+                  <!-- <a class="mostrac" onclick="show()"></a> -->
+                    <!-- <button onclick="show()">Mostrar Cadastros<button> -->
+                       <input type="button" style="width: 30%;" value="Mostrar latitude" onclick="latitude()">
+                   <!-- <a class="mostral" onclick="latitude()"></a> -->
+                     <!-- <button onclick="latitude()">Mostrar latitude<button> -->
+                        <input type="button" style="width: 30%;" value="Esconder Cadastro" onclick="esconder()">
+
+                   <!-- <a class="esconde" onclick="esconder()"></a> -->
+                     <!-- <button onclick="esconder()">Esconder Cadastro</button> -->
+                   </div>
+           </div>
+</div>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+</body>
+
+</html>
